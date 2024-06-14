@@ -11,10 +11,11 @@ public class Main {
         run();
         clean();
     }
+    
     public static void init() throws Exception {
-        String url = "jdbc:mysql://localhost:3306/hotelroom?serverTimezone=UTC";
+        String url = "jdbc:mysql://localhost:3306/hotelRoom?serverTimezone=UTC";
         String username = "root";
-        String passWord = "20021028";
+        String passWord = "abc";
         func = new Func(url, username, passWord);
         scan = new Scanner(System.in);
     }
@@ -29,28 +30,27 @@ public class Main {
         boolean loop = true;
 
         while (loop) {
-            //查询
-            System.out.println("1.查询入住信息");
-            System.out.println("2.查询付款信息");
-            //顾客管理
-            System.out.println("3.添加一个顾客");
-            System.out.println("4.删除一个顾客(通过顾客id)");
-            System.out.println("5.更新一个顾客信息(通过顾客Id)");
-            System.out.println("6.展示所有顾客");
-            //房间管理
-            System.out.println("7.添加一个房间(通过房间Id)");
-            System.out.println("8.删除一个房间(通过房间Id)");
-            System.out.println("9.更新一个房间信息(通过房间Id)");
-            System.out.println("10.展示所有房间");
-            //入住管理
-            System.out.println("11.入住管理");
-            System.out.println("12.退房管理");
-            //消费管理
-            System.out.println("13.增加消费");
-            System.out.println("14.删除消费");
-            System.out.println("15.查看消费记录");
-            System.out.println("其他.退出系统");            
-            System.out.println("输入选择的功能:");
+            System.out.println("1. Query Check-in Details");
+            System.out.println("2. Query Payment Details");
+            // Customer Management
+            System.out.println("3. Add a Customer");
+            System.out.println("4. Delete a Customer (by Customer ID)");
+            System.out.println("5. Update a Customer (by Customer ID)");
+            System.out.println("6. List All Customers");
+            // Room Management
+            System.out.println("7. Add a Room");
+            System.out.println("8. Delete a Room (by Room ID)");
+            System.out.println("9. Update a Room (by Room ID)");
+            System.out.println("10. List All Rooms");
+            // Check-in Management
+            System.out.println("11. Check-in");
+            System.out.println("12. Check-out");
+            // Transaction Management
+            System.out.println("13. Add a Transaction");
+            System.out.println("14. Delete a Transaction");
+            System.out.println("15. View Transaction History");
+            System.out.println("Other number will exit system");
+            System.out.println("Enter your choice: ");
 
 
             x = scan.nextInt();
@@ -101,7 +101,7 @@ public class Main {
                     func.ShowAllTransactions();
                     break;
                 default:
-                    System.out.println("错误输入， 系统提出");
+                    System.out.println("System Exit...");
                     func.CAPCmd(2);
                     loop = false;
                     break;

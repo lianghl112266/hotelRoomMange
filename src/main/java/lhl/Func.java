@@ -1,9 +1,9 @@
 package lhl;
 
 import java.sql.*;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -35,40 +35,42 @@ public class Func {
     }
 
 
-    public Date convertToSqlDate(LocalDateTime localDateTime) {
-        LocalDate localDate = localDateTime.toLocalDate();
-        Date sqlDate = new Date(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-        return sqlDate;
-    }
-
-
     public void QueryCheckInDetails() throws Exception {
         CAPCmd(0);
-        String sql = "SELECT ci.`checkInId`, c.name, r.location, r.`type`, r.price, ci.`checkInTime`, ci.`checkOutTime`, DATEDIFF(ci.`checkOutTime`, ci.`checkInTime`) as stayDay FROM checkIns ci LEFT JOIN rooms r ON ci.roomId = r.id LEFT JOIN customers c ON ci.customerId = c.id";
-        ResultSet items = exec.executeQuery(sql);
 
-        while (items.next()) {
-            Integer checkInId = items.getInt("checkInId");
-            String name = items.getString("name");
-            String location = items.getString("location");
-            String type = items.getString("type");
-            Double price = items.getDouble("price");
-            Date inDate = items.getDate("checkInTime");
-            Date outDate = items.getDate("checkOutTime");
-            Integer stayDay = items.getInt("stayDay");
+        String sql = "SELECT ci.id, c.name, r.location, r.`type`, r.price, " +
+                "ci.`checkInTime`, ci.`checkOutTime`, " +
+                "DATEDIFF(ci.`checkOutTime`, ci.`checkInTime`) as stayDay " +
+                "FROM checkIns ci " +
+                "LEFT JOIN rooms r ON ci.roomId = r.id " +
+                "LEFT JOIN customers c ON ci.customerId = c.id";
 
+        try (ResultSet items = exec.executeQuery(sql)) {
             System.out.println("---------------------------------------");
-            System.out.println("Check-in ID: " + checkInId);
-            System.out.println("Name: " + name);
-            System.out.println("Location: " + location);
-            System.out.println("Type: " + type);
-            System.out.println("Price: " + price);
-            System.out.println("Check-in Date: " + inDate);
-            System.out.println("Check-out Date: " + outDate);
-            System.out.println("stayDay: " + stayDay + "天");
+            while (items.next()) {
+                int checkInId = items.getInt("id");
+                String name = items.getString("name");
+                String location = items.getString("location");
+                String type = items.getString("type");
+                double price = items.getDouble("price");
+                Date inDate = items.getDate("checkInTime");
+                Date outDate = items.getDate("checkOutTime");
+                int stayDay = items.getInt("stayDay");
+
+                System.out.println("Check-in ID: " + checkInId);
+                System.out.println("Name: " + name);
+                System.out.println("Location: " + location);
+                System.out.println("Type: " + type);
+                System.out.println("Price: " + price);
+                System.out.println("Check-in Date: " + inDate);
+                System.out.println("Check-out Date: " + outDate);
+                System.out.println("Stay Days: " + stayDay + "day");
+                System.out.println();
+            }
+            System.out.println("---------------------------------------");
         }
 
-        System.out.println("展示完毕， 按任意数字键推出");
+        System.out.println("Press any dight key to exit");
         scan.nextInt();
         CAPCmd(0);
     }
@@ -76,32 +78,37 @@ public class Func {
 
     void QueryPayDetails() throws Exception {
         CAPCmd(0);
-        String sql = "SELECT t.id, t.`paymentType`, t.`paymentDescription`, t.`paymentTime`, t.`customerId`, c.name, t.`amountDue`, t.`amountPaid` FROM transactions t LEFT JOIN customers c ON t.`customerId` = c.id";
+        String sql = "SELECT t.id, t.`paymentType`, t.`paymentDescription`, t.`paymentTime`, " +
+                "t.`customerId`, c.name, t.`amountDue`, t.`amountPaid` " +
+                "FROM transactions t " +
+                "LEFT JOIN customers c ON t.`customerId` = c.id";
 
-        ResultSet items = exec.executeQuery(sql);
-
-        while (items.next()) {
-            int id = items.getInt("id");
-            String paymentType = items.getString("paymentType");
-            String paymentDescription = items.getString("paymentDescription");
-            Timestamp paymentTime = items.getTimestamp("paymentTime");
-            int customerId = items.getInt("customerId");
-            String customerName = items.getString("name");
-            double amountDue = items.getDouble("amountDue");
-            double amountPaid = items.getDouble("amountPaid");
-
+        try (ResultSet items = exec.executeQuery(sql)) {
             System.out.println("---------------------------------------");
-            System.out.println("pay id: " + id);
-            System.out.println("paymentType: " + paymentType);
-            System.out.println("paymentDescription: " + paymentDescription);
-            System.out.println("paymentTime: " + paymentTime);
-            System.out.println("customerId: " + customerId);
-            System.out.println("customerName: " + customerName);
-            System.out.println("amountDue: " + amountDue);
-            System.out.println("amountPaid: " + amountPaid);
+            while (items.next()) {
+                int paymentId = items.getInt("id");
+                String paymentType = items.getString("paymentType");
+                String paymentDescription = items.getString("paymentDescription");
+                Timestamp paymentTime = items.getTimestamp("paymentTime");
+                int customerId = items.getInt("customerId");
+                String customerName = items.getString("name");
+                double amountDue = items.getDouble("amountDue");
+                double amountPaid = items.getDouble("amountPaid");
+
+                System.out.println("Payment ID: " + paymentId);
+                System.out.println("Payment Type: " + paymentType);
+                System.out.println("Payment Description: " + paymentDescription);
+                System.out.println("Payment Time: " + paymentTime);
+                System.out.println("Customer ID: " + customerId);
+                System.out.println("Customer Name: " + customerName);
+                System.out.println("Amount Due: " + amountDue);
+                System.out.println("Amount Paid: " + amountPaid);
+                System.out.println();
+            }
+            System.out.println("---------------------------------------");
         }
 
-        System.out.println("展示完毕， 按任意数字键推出");
+        System.out.println("Press any dight key to exit");
         scan.nextInt();
         CAPCmd(0);
     }
@@ -109,53 +116,30 @@ public class Func {
 
     void AddCustomer() throws Exception {
         CAPCmd(0);
-        System.out.println("input customer information:\n");
-        System.out.println("name:");
-        String name = scan.nextLine().strip();
-        System.out.println("gender(only Male or Female):");
+        System.out.println("Enter customer information:\n");
+        System.out.print("Name: ");
+        String customerName = scan.nextLine().strip();
+        System.out.print("Gender (only Male or Female): ");
         String gender = scan.nextLine().strip();
-        System.out.println("idNumber(Length must is 18):");
+        System.out.print("ID Number (must be 18 digits): ");
         String idNumber = scan.nextLine().strip();
-        System.out.println("phoneNumber(Length must is 11):");
+        System.out.print("Phone Number (must be 11 digits): ");
         String phoneNumber = scan.nextLine().strip();
-
-        if (!gender.equals("Male") && !gender.equals("FeMale")) {
-
-            System.out.println(
-                    "your input has error near gender, input any number key and system will go back dashboard\n");
-            scan.nextInt();
-            CAPCmd(0);
-            return;
-        }
-        if (idNumber.length() != 18) {
-            System.out.println(
-                    "your input has error near idNumber, input any number key and system will go back dashboard\n");
-            scan.nextInt();
-            CAPCmd(0);
-            return;
-        }
-        if (phoneNumber.length() != 11) {
-            System.out.println(
-                    "your input has error near phoneNumber, input any number key and system will go back dashboard\n");
-            scan.nextInt();
-            CAPCmd(0);
-            return;
-        }
 
         try {
             String sql = "INSERT INTO customers (name, gender, idNumber, phoneNumber) VALUES (?, ?, ?, ?)";
             PreparedStatement exec = coon.prepareStatement(sql);
-            exec.setString(1, name);
+            exec.setString(1, customerName);
             exec.setString(2, gender);
             exec.setString(3, idNumber);
             exec.setString(4, phoneNumber);
             exec.executeUpdate();
-            System.out.print("successful add customer\n");
+            System.out.println("Customer added successfully!\n");
 
         } catch (Exception e) {
-            System.out.println("fail add customer due to" + e.getMessage());
+            System.out.println("Failed to add customer, reason: " + e.getMessage());
         } finally {
-            System.out.println("按任意数字键推出");
+            System.out.println("Press any dight key to exit");
             scan.nextInt();
             CAPCmd(0);
         }
@@ -164,20 +148,23 @@ public class Func {
 
     void DropCustomer() throws Exception {
         CAPCmd(0);
-        System.out.println("input customer id:");
-        Integer id = scan.nextInt();
 
-        String sql = "DELETE FROM customers WHERE id = (?);";
-        PreparedStatement exec = coon.prepareStatement(sql);
-        exec.setInt(1, id);
-        int row = exec.executeUpdate();
-        if (row == 1) {
-            System.out.print("successful drop customer\n");
-        } else {
-            System.out.print("fail to drop customer due to id absence\n");
+        System.out.print("Enter customer ID: ");
+        int id = scan.nextInt();
+        scan.nextLine();
+
+        String sql = "DELETE FROM customers WHERE id = ?";
+        try (PreparedStatement exec = coon.prepareStatement(sql)) {
+            exec.setInt(1, id);
+            int rowsAffected = exec.executeUpdate();
+            if (rowsAffected == 1) {
+                System.out.println("Customer deleted successfully!\n");
+            } else {
+                System.out.println("Failed to delete customer. Customer with ID " + id + " not found.\n");
+            }
         }
 
-        System.out.println("按任意数字键推出");
+        System.out.println("Press any key to exit");
         scan.nextInt();
         CAPCmd(0);
     }
@@ -185,42 +172,46 @@ public class Func {
 
     void UpdateCustomerInfo() throws Exception {
         CAPCmd(0);
-        System.out.println("expect customer id:");
-        Integer id = scan.nextInt();
 
-        System.out.println("input customer new information");
-        System.out.println("id:");
-        Integer newId = scan.nextInt();
+        System.out.print("Enter customer ID to update: ");
+        int idToUpdate = scan.nextInt();
         scan.nextLine();
 
-        System.out.println("name:");
+        System.out.println("Enter new customer information:");
+        System.out.print("New ID: ");
+        int newId = scan.nextInt();
+        scan.nextLine();
+
+        System.out.print("Name: ");
         String name = scan.nextLine();
 
-        System.out.println("gender(only Male or Female):");
+        System.out.print("Gender (only Male or Female): ");
         String gender = scan.nextLine();
 
-        System.out.println("idNumber(Length must is 18):");
+        System.out.print("ID Number (must be 18 digits): ");
         String idNumber = scan.nextLine();
 
-        System.out.println("phoneNumber(Length must is 11):");
+        System.out.print("Phone Number (must be 11 digits): ");
         String phoneNumber = scan.nextLine();
 
-        try {
-            String sql = "UPDATE customers SET id = (?), gender = (?), `idNumber` = (?), name = (?), `phoneNumber` = (?) WHERE id = (?)";
-            PreparedStatement exec = coon.prepareStatement(sql);
+        try (PreparedStatement exec = coon.prepareStatement(
+                "UPDATE customers SET id = ?, gender = ?, `idNumber` = ?, name = ?, `phoneNumber` = ? WHERE id = ?")) {
             exec.setInt(1, newId);
             exec.setString(2, gender);
             exec.setString(3, idNumber);
             exec.setString(4, name);
             exec.setString(5, phoneNumber);
-            exec.setInt(6, id);
-            exec.executeUpdate();
-            System.out.print("successful update customer\n");
-
+            exec.setInt(6, idToUpdate);
+            int rowsAffected = exec.executeUpdate();
+            if (rowsAffected == 1) {
+                System.out.println("Customer updated successfully!\n");
+            } else {
+                System.out.println("Failed to update customer. Customer with ID " + idToUpdate + " not found.\n");
+            }
         } catch (Exception e) {
-            System.out.println("fail update customer due to" + e.getMessage());
+            System.out.println("Failed to update customer, reason: " + e.getMessage());
         } finally {
-            System.out.println("按任意数字键推出");
+            System.out.println("Press any key to exit");
             scan.nextInt();
             CAPCmd(0);
         }
@@ -229,60 +220,64 @@ public class Func {
 
     void ShowAllCustomers() throws Exception {
         CAPCmd(0);
-        String sql = "SELECT * FROM customers";
-        ResultSet items = exec.executeQuery(sql);
-        while (items.next()) {
-            Integer id = items.getInt("id");
-            String name = items.getString("name");
-            String idNumber = items.getString("idNumber");
-            String phoneNumber = items.getString("phoneNumber");
 
+        String sql = "SELECT * FROM customers";
+
+        try (ResultSet items = exec.executeQuery(sql)) {
             System.out.println("---------------------------------------");
-            System.out.println("customer id: " + id);
-            System.out.println("customerName: " + name);
-            System.out.println("idNumber: " + idNumber);
-            System.out.println("phoneNumber: " + phoneNumber);
+            while (items.next()) {
+                int id = items.getInt("id");
+                String name = items.getString("name");
+                String idNumber = items.getString("idNumber");
+                String phoneNumber = items.getString("phoneNumber");
+
+                System.out.println("Customer ID: " + id);
+                System.out.println("Customer Name: " + name);
+                System.out.println("ID Number: " + idNumber);
+                System.out.println("Phone Number: " + phoneNumber);
+                System.out.println();
+            }
+            System.out.println("---------------------------------------");
         }
-        System.out.println("按任意数字键推出");
+
+        System.out.println("Press any key to exit");
         scan.nextInt();
         CAPCmd(0);
     }
 
 
     void AddRoom() throws Exception {
-        CAPCmd(0);
+        CAPCmd(0); // Assume CAPCmd is a function to control program flow
 
-        System.out.println("input room new information");
+        System.out.println("Enter new room information:");
 
-        System.out.println("location:");
+        System.out.print("Location: ");
         String location = scan.nextLine();
 
-        System.out.println("type:");
+        System.out.print("Type: ");
         String type = scan.nextLine();
 
-        System.out.println("area:");
-        Float area = scan.nextFloat();
+        System.out.print("Area: ");
+        float area = scan.nextFloat();
         scan.nextLine();
 
-        System.out.println("airConditioner:");
-        Boolean airConditioner = scan.nextBoolean();
+        System.out.print("Air Conditioner (true/false): ");
+        boolean airConditioner = scan.nextBoolean();
         scan.nextLine();
 
-        System.out.println("waterHeater:");
-        Boolean waterHeater = scan.nextBoolean();
+        System.out.print("Water Heater (true/false): ");
+        boolean waterHeater = scan.nextBoolean();
         scan.nextLine();
 
-        System.out.println("status:");
+        System.out.print("Status: ");
         String status = scan.nextLine();
 
-        System.out.println("price:");
-        Double price = scan.nextDouble();
+        System.out.print("Price: ");
+        double price = scan.nextDouble();
         scan.nextLine();
 
-        try {
-            String sql = "INSERT INTO rooms (location,type,area,airConditioner,waterHeater,status,price) VALUES ((?), (?), (?), (?), (?), (?), (?))";
-
-            PreparedStatement exec = coon.prepareStatement(sql);
+        try (PreparedStatement exec = coon.prepareStatement(
+                "INSERT INTO rooms (location, type, area, airConditioner, waterHeater, status, price) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
             exec.setString(1, location);
             exec.setString(2, type);
             exec.setFloat(3, area);
@@ -290,13 +285,16 @@ public class Func {
             exec.setBoolean(5, waterHeater);
             exec.setString(6, status);
             exec.setDouble(7, price);
-            exec.executeUpdate();
-            System.out.print("successful add room\n");
-
+            int rowsAffected = exec.executeUpdate();
+            if (rowsAffected == 1) {
+                System.out.println("Room added successfully!\n");
+            } else {
+                System.out.println("Failed to add room.\n");
+            }
         } catch (Exception e) {
-            System.out.println("fail add room due to" + e.getMessage());
+            System.out.println("Failed to add room, reason: " + e.getMessage());
         } finally {
-            System.out.println("按任意数字键推出");
+            System.out.println("Press any key to exit");
             scan.nextInt();
             CAPCmd(0);
         }
@@ -305,20 +303,23 @@ public class Func {
 
     void DropRoom() throws Exception {
         CAPCmd(0);
-        System.out.println("input room id:");
-        Integer id = scan.nextInt();
+
+        System.out.print("Enter room ID to delete: ");
+        int idToDelete = scan.nextInt();
         scan.nextLine();
-        String sql = "DELETE FROM rooms WHERE id = (?);";
-        PreparedStatement exec = coon.prepareStatement(sql);
-        exec.setInt(1, id);
-        int row = exec.executeUpdate();
-        if (row == 1) {
-            System.out.println("successful drop room");
-        } else {
-            System.out.println("fail to drop room due to id absence");
+
+        String sql = "DELETE FROM rooms WHERE id = ?";
+        try (PreparedStatement exec = coon.prepareStatement(sql)) {
+            exec.setInt(1, idToDelete);
+            int rowsAffected = exec.executeUpdate();
+            if (rowsAffected == 1) {
+                System.out.println("Room deleted successfully!\n");
+            } else {
+                System.out.println("Failed to delete room. Room with ID " + idToDelete + " not found.\n");
+            }
         }
 
-        System.out.println("按任意数字键推出");
+        System.out.println("Press any dight key to exit");
         scan.nextInt();
         CAPCmd(0);
     }
@@ -327,43 +328,42 @@ public class Func {
     void UpdateRoomInfo() throws Exception {
         CAPCmd(0);
 
-        System.out.println("expect room id:");
-        Integer id = scan.nextInt();
+        System.out.print("Enter room ID to update: ");
+        int idToUpdate = scan.nextInt();
         scan.nextLine();
 
-        System.out.println("input room new information");
-        System.out.println("id:");
-        Integer newId = scan.nextInt();
+        System.out.println("Enter new room information:");
+        System.out.print("New ID: ");
+        int newId = scan.nextInt();
         scan.nextLine();
 
-        System.out.println("location:");
+        System.out.print("Location: ");
         String location = scan.nextLine();
 
-        System.out.println("type:");
+        System.out.print("Type: ");
         String type = scan.nextLine();
 
-        System.out.println("area:");
-        Float area = scan.nextFloat();
+        System.out.print("Area: ");
+        float area = scan.nextFloat();
         scan.nextLine();
 
-        System.out.println("airConditioner:");
-        Boolean airConditioner = scan.nextBoolean();
+        System.out.print("Air Conditioner (true/false): ");
+        boolean airConditioner = scan.nextBoolean();
         scan.nextLine();
 
-        System.out.println("waterHeater:");
-        Boolean waterHeater = scan.nextBoolean();
+        System.out.print("Water Heater (true/false): ");
+        boolean waterHeater = scan.nextBoolean();
         scan.nextLine();
 
-        System.out.println("status:");
+        System.out.print("Status: ");
         String status = scan.nextLine();
 
-        System.out.println("price:");
-        Double price = scan.nextDouble();
+        System.out.print("Price: ");
+        double price = scan.nextDouble();
         scan.nextLine();
 
-        try {
-            String sql = "UPDATE rooms SET location = (?), type = (?), area = (?), `airConditioner` = (?), `waterHeater` = (?), status = (?), price = (?), id = (?) WHERE id = (?)";
-            PreparedStatement exec = coon.prepareStatement(sql);
+        try (PreparedStatement exec = coon.prepareStatement(
+                "UPDATE rooms SET location = ?, type = ?, area = ?, airConditioner = ?, waterHeater = ?, status = ?, price = ?, id = ? WHERE id = ?")) {
             exec.setString(1, location);
             exec.setString(2, type);
             exec.setFloat(3, area);
@@ -371,16 +371,18 @@ public class Func {
             exec.setBoolean(5, waterHeater);
             exec.setString(6, status);
             exec.setDouble(7, price);
-            exec.setInt(8, id);
-            exec.setInt(9, newId);
-            exec.executeUpdate();
-
-            System.out.println("successful update room");
-
+            exec.setInt(8, newId);
+            exec.setInt(9, idToUpdate);
+            int rowsAffected = exec.executeUpdate();
+            if (rowsAffected == 1) {
+                System.out.println("Room updated successfully!\n");
+            } else {
+                System.out.println("Failed to update room. Room with ID " + idToUpdate + " not found.\n");
+            }
         } catch (Exception e) {
-            System.out.println("fail update customer due to" + e.getMessage());
+            System.out.println("Failed to update room, reason: " + e.getMessage());
         } finally {
-            System.out.println("按任意数字键推出");
+            System.out.println("Press any dight key to exit");
             scan.nextInt();
             CAPCmd(0);
         }
@@ -389,74 +391,84 @@ public class Func {
 
     void ShowAllRooms() throws Exception {
         CAPCmd(0);
+
         String sql = "SELECT * FROM rooms";
-        ResultSet items = exec.executeQuery(sql);
-        while (items.next()) {
-            int id = items.getInt("id");
-            String location = items.getString("location");
-            String type = items.getString("type");
-            float area = items.getFloat("area");
-            boolean airConditioner = items.getBoolean("airConditioner");
-            boolean waterHeater = items.getBoolean("waterHeater");
-            String status = items.getString("status");
-            double price = items.getDouble("price");
 
-            System.out.println("-------------------------");
-            System.out.println("Room ID: " + id);
-            System.out.println("Location: " + location);
-            System.out.println("Type: " + type);
-            System.out.println("Area: " + area + " square meters");
-            System.out.println("Air Conditioner: " + (airConditioner ? "Yes" : "No"));
-            System.out.println("Water Heater: " + (waterHeater ? "Yes" : "No"));
-            System.out.println("Status: " + status);
-            System.out.println("Price: $" + price);
+        try (ResultSet items = exec.executeQuery(sql)) {
+            System.out.println("---------------------------------------");
+            while (items.next()) {
+                int id = items.getInt("id");
+                String location = items.getString("location");
+                String type = items.getString("type");
+                float area = items.getFloat("area");
+                boolean airConditioner = items.getBoolean("airConditioner");
+                boolean waterHeater = items.getBoolean("waterHeater");
+                String status = items.getString("status");
+                double price = items.getDouble("price");
 
+                System.out.println("Room ID: " + id);
+                System.out.println("Location: " + location);
+                System.out.println("Type: " + type);
+                System.out.println("Area: " + area + " square meters");
+                System.out.println("Air Conditioner: " + (airConditioner ? "Yes" : "No"));
+                System.out.println("Water Heater: " + (waterHeater ? "Yes" : "No"));
+                System.out.println("Status: " + status);
+                System.out.println("Price: $" + price);
+                System.out.println();
+            }
+            System.out.println("---------------------------------------");
         }
-        System.out.println("按任意数字键推出");
+
+        System.out.println("Press any key to exit");
         scan.nextInt();
         CAPCmd(0);
     }
 
 
     void CheckIn() throws Exception {
-        CAPCmd(0);
-        System.out.println("customer id:");
-        int user = scan.nextInt();
+        CAPCmd(0); // Assume CAPCmd is a function to control program flow
+
+        System.out.print("Enter customer ID: ");
+        int customerId = scan.nextInt();
         scan.nextLine();
 
-        System.out.println("room id:");
-        int room = scan.nextInt();
+        System.out.print("Enter room ID: ");
+        int roomId = scan.nextInt();
         scan.nextLine();
 
-        System.out.println("expect stay day:");
-        int day = scan.nextInt();
+        System.out.print("Enter expected stay days: ");
+        int stayDays = scan.nextInt();
         scan.nextLine();
 
-        long timeInMillis = System.currentTimeMillis();
-        long DaysInMillis = day * 24 * 60 * 60 * 1000;
+        long checkInTimeInMillis = System.currentTimeMillis();
+        long checkOutTimeInMillis = checkInTimeInMillis + (stayDays * 24 * 60 * 60 * 1000);
+
         coon.setAutoCommit(false);
         try {
             String sql = "INSERT INTO checkIns (customerId, roomId, checkInTime, checkOutTime) VALUES (?, ?, ?, ?)";
-            PreparedStatement exec = coon.prepareStatement(sql);
-            exec.setInt(1, user);
-            exec.setInt(2, room);
+            try (PreparedStatement exec = coon.prepareStatement(sql)) {
+                exec.setInt(1, customerId);
+                exec.setInt(2, roomId);
+                exec.setTimestamp(3, new Timestamp(checkInTimeInMillis));
+                exec.setTimestamp(4, new Timestamp(checkOutTimeInMillis));
+                exec.executeUpdate();
+            }
 
-            exec.setTimestamp(3, new Timestamp(timeInMillis));
-            exec.setTimestamp(4, new Timestamp(DaysInMillis));
-            exec.executeUpdate();
+            sql = "UPDATE rooms SET status = 'Occupied' WHERE id = ?";
+            try (PreparedStatement exec = coon.prepareStatement(sql)) {
+                exec.setInt(1, roomId);
+                exec.executeUpdate();
+            }
 
-            sql = "UPDATE rooms SET status = 'Occupied' WHERE id = " + room;
-            coon.createStatement().executeUpdate(sql);
-
-            System.out.println("successful check in room");
+            System.out.println("Room checked in successfully!\n");
             coon.commit();
 
         } catch (Exception e) {
-            System.out.println("fail to check in room due to " + e.getMessage());
+            System.out.println("Failed to check in room, reason: " + e.getMessage());
             coon.rollback();
         } finally {
             coon.setAutoCommit(true);
-            System.out.println("按任意数字键推出");
+            System.out.println("Press any key to exit");
             scan.nextInt();
             scan.nextLine();
             CAPCmd(0);
@@ -466,34 +478,42 @@ public class Func {
 
     void CheckOut() throws Exception {
         CAPCmd(0);
-        System.out.println("input checkIn id:");
-        Integer id = scan.nextInt();
+
+        System.out.print("Enter check-in ID: ");
+        int checkInId = scan.nextInt();
         scan.nextLine();
 
-        String sql = "SELECT * FROM checkIns WHERE id = " + id;
+        String sql = "SELECT * FROM checkIns WHERE id = ?";
+        try (PreparedStatement exec = coon.prepareStatement(sql)) {
+            exec.setInt(1, checkInId);
+            ResultSet roomInfo = exec.executeQuery();
 
-        ResultSet roomInfo = exec.executeQuery(sql);
-        if (roomInfo == null) {
-            System.out.println("fail to check out due to id absence");
-            System.out.println("按任意数字键推出");
-            scan.nextInt();
-            CAPCmd(0);
-            return;
+            if (!roomInfo.next()) {
+                System.out.println("Failed to check out. Check-in with ID " + checkInId + " not found.\n");
+                System.out.println("Press any dight key to exit");
+                scan.nextInt();
+                CAPCmd(0);
+                return;
+            }
+
+            int roomId = roomInfo.getInt("roomId");
+            sql = "UPDATE rooms SET status = 'Vacant' WHERE id = ?";
+            try (PreparedStatement updateRoom = coon.prepareStatement(sql)) {
+                updateRoom.setInt(1, roomId);
+                updateRoom.executeUpdate();
+            }
+
+            sql = "DELETE FROM checkIns WHERE id = ?";
+            try (PreparedStatement deleteCheckIn = coon.prepareStatement(sql)) {
+                deleteCheckIn.setInt(1, checkInId);
+                deleteCheckIn.executeUpdate();
+            }
+
+            System.out.println("Room checked out successfully!\n");
+
         }
-        roomInfo.next();
-        int roomId = roomInfo.getInt("roomId");
-        System.out.println(roomId);
-        sql = "UPDATE rooms SET status = 'Vacant' WHERE id = " + roomId;
-        coon.createStatement().executeUpdate(sql);
 
-        sql = "DELETE FROM checkIns WHERE id = (?)";
-        PreparedStatement exec = coon.prepareStatement(sql);
-        exec.setInt(1, id);
-        exec.executeUpdate();
-
-        System.out.println("successful check out");
-
-        System.out.println("按任意数字键推出");
+        System.out.println("Press any dight key to exit");
         scan.nextInt();
         CAPCmd(0);
     }
@@ -502,45 +522,46 @@ public class Func {
     void AddCost() throws Exception {
         CAPCmd(0);
 
-        System.out.println(" payment type: ");
+        System.out.print("Payment Type: ");
         String paymentType = scan.nextLine();
 
-        System.out.println(" payment description: ");
+        System.out.print("Payment Description: ");
         String paymentDescription = scan.nextLine();
 
-        // Assuming paymentTime should be current time
-        LocalDateTime paymentTime = LocalDateTime.now();
+        Timestamp paymentTime = Timestamp.valueOf(LocalDateTime.now());
 
-        System.out.println(" customer ID: ");
+        System.out.print("Customer ID: ");
         int customerId = scan.nextInt();
         scan.nextLine();
 
-        System.out.println(" amount due: ");
+        System.out.print("Amount Due: ");
         double amountDue = scan.nextDouble();
+        scan.nextLine();
 
-        System.out.println(" amount paid: ");
+        System.out.print("Amount Paid: ");
         double amountPaid = scan.nextDouble();
+        scan.nextLine();
 
-        try {
-            String sql = "INSERT INTO transactions " +
-                    "(paymentType, paymentDescription, paymentTime, customerId, amountDue, amountPaid) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)" ;
-
-            PreparedStatement exec = coon.prepareStatement(sql);
+        try (PreparedStatement exec = coon.prepareStatement(
+                "INSERT INTO transactions (paymentType, paymentDescription, paymentTime, customerId, amountDue, amountPaid) VALUES (?, ?, ?, ?, ?, ?)")) {
             exec.setString(1, paymentType);
             exec.setString(2, paymentDescription);
-            exec.setObject(3, paymentTime);
+            exec.setTimestamp(3, paymentTime);
             exec.setInt(4, customerId);
             exec.setDouble(5, amountDue);
             exec.setDouble(6, amountPaid);
-            exec.executeUpdate();
-            System.out.print("successful add transaction\n");
-
+            int rowsAffected = exec.executeUpdate();
+            if (rowsAffected == 1) {
+                System.out.println("Transaction added successfully!\n");
+            } else {
+                System.out.println("Failed to add transaction.\n");
+            }
         } catch (Exception e) {
-            System.out.println("fail add transcation due to" + e.getMessage());
+            System.out.println("Failed to add transaction, reason: " + e.getMessage());
         } finally {
-            System.out.println("按任意数字键推出");
+            System.out.println("Press any key to exit");
             scan.nextInt();
+            scan.nextLine();
             CAPCmd(0);
         }
     }
@@ -548,19 +569,24 @@ public class Func {
 
     void DropTransaction() throws Exception {
         CAPCmd(0);
-        System.out.println("input transaction id:");
-        Integer id = scan.nextInt();
+
+        System.out.print("Enter transaction ID to delete: ");
+        int transactionId = scan.nextInt();
         scan.nextLine();
-        String sql = "DELETE FROM transactions WHERE id = (?);";
-        PreparedStatement exec = coon.prepareStatement(sql);
-        exec.setInt(1, id);
-        int row = exec.executeUpdate();
-        if (row == 1) {
-            System.out.println("successful drop transactions");
-        } else {
-            System.out.println("fail to drop transactions due to id absence");
+
+        String sql = "DELETE FROM transactions WHERE id = ?";
+        try (PreparedStatement exec = coon.prepareStatement(sql)) {
+            exec.setInt(1, transactionId);
+            int rowsAffected = exec.executeUpdate();
+            if (rowsAffected == 1) {
+                System.out.println("Transaction deleted successfully!\n");
+            } else {
+                System.out.println(
+                        "Failed to delete transaction. Transaction with ID " + transactionId + " not found.\n");
+            }
         }
-        System.out.println("按任意数字键推出");
+
+        System.out.println("Press any dight key to exit");
         scan.nextInt();
         CAPCmd(0);
     }
@@ -568,28 +594,36 @@ public class Func {
 
     void ShowAllTransactions() throws Exception {
         CAPCmd(0);
-        String sql = "SELECT * FROM transactions";
-        ResultSet items = exec.executeQuery(sql);
-        while (items.next()) {
-            int id = items.getInt("id");
-            String paymentType = items.getString("paymentType");
-            String paymentDescription = items.getString("paymentDescription");
-            String paymentTime = items.getString("paymentTime");
-            int customerId = items.getInt("customerId");
-            double amountDue = items.getDouble("amountDue");
-            double amountPaid = items.getDouble("amountPaid");
 
-            System.out.println("-------------------------");
-            System.out.println("Payment ID: " + id);
-            System.out.println("Payment Type: " + paymentType);
-            System.out.println("Payment Description: " + paymentDescription);
-            System.out.println("Payment Time: " + paymentTime);
-            System.out.println("Customer ID: " + customerId);
-            System.out.println("Amount Due: $" + amountDue);
-            System.out.println("Amount Paid: $" + amountPaid);
+        String sql = "SELECT * FROM transactions";
+
+        try (ResultSet items = exec.executeQuery(sql)) {
+            System.out.println("---------------------------------------");
+            while (items.next()) {
+                int id = items.getInt("id");
+                String paymentType = items.getString("paymentType");
+                String paymentDescription = items.getString("paymentDescription");
+                Timestamp paymentTime = items.getTimestamp("paymentTime");
+                int customerId = items.getInt("customerId");
+                double amountDue = items.getDouble("amountDue");
+                double amountPaid = items.getDouble("amountPaid");
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String formattedPaymentTime = paymentTime.toLocalDateTime().format(formatter);
+
+                System.out.println("Payment ID: " + id);
+                System.out.println("Payment Type: " + paymentType);
+                System.out.println("Payment Description: " + paymentDescription);
+                System.out.println("Payment Time: " + formattedPaymentTime);
+                System.out.println("Customer ID: " + customerId);
+                System.out.println("Amount Due: $" + amountDue);
+                System.out.println("Amount Paid: $" + amountPaid);
+                System.out.println();
+            }
+            System.out.println("---------------------------------------");
         }
 
-        System.out.println("按任意数字键推出");
+        System.out.println("Press any dight key to exit");
         scan.nextInt();
         CAPCmd(0);
     }

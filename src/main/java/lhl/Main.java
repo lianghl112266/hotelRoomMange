@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class Main {
     static Func func;
-    
+
     static Scanner scan;
 
     public static void main(String[] args) throws Exception {
@@ -12,7 +12,7 @@ public class Main {
         run();
         clean();
     }
-    
+
     public static void init() throws Exception {
         String url = "jdbc:mysql://localhost:3306/hotelRoom?serverTimezone=UTC";
         String username = "root";
@@ -52,7 +52,6 @@ public class Main {
             System.out.println("15. View Transaction History");
             System.out.println("Other number will exit system");
             System.out.println("Enter your choice: ");
-
 
             x = scan.nextInt();
             scan.nextLine();

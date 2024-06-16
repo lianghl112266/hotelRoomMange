@@ -4,36 +4,39 @@ import java.sql.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 public class Func {
 
-    public Connection coon;
+    public Connection conn;
     public Statement exec;
-    public Scanner scan;
+    public Scanner sc;
 
     public Func(String url, String username, String password) throws Exception {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        coon = DriverManager.getConnection(url, username, password);
-        exec = coon.createStatement();
-        scan = new Scanner(System.in);
+        conn = DriverManager.getConnection(url, username, password);
+        exec = conn.createStatement();
+        sc = new Scanner(System.in);
 
     }
-    
+
     public void close() throws Exception {
-        coon.close();
+        conn.close();
         exec.close();
-        scan.close();
+        sc.close();
     }
-    
 
+    // CAPCmd provides clearing
     public void CAPCmd(int seconds) throws Exception {
         TimeUnit.SECONDS.sleep(seconds);
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
-
 
     public void QueryCheckInDetails() throws Exception {
         CAPCmd(0);
@@ -71,10 +74,9 @@ public class Func {
         }
 
         System.out.println("Press any dight key to exit");
-        scan.nextInt();
+        sc.nextInt();
         CAPCmd(0);
     }
-
 
     void QueryPayDetails() throws Exception {
         CAPCmd(0);
@@ -109,26 +111,25 @@ public class Func {
         }
 
         System.out.println("Press any dight key to exit");
-        scan.nextInt();
+        sc.nextInt();
         CAPCmd(0);
     }
-
 
     void AddCustomer() throws Exception {
         CAPCmd(0);
         System.out.println("Enter customer information:\n");
         System.out.print("Name: ");
-        String customerName = scan.nextLine().strip();
+        String customerName = sc.nextLine().strip();
         System.out.print("Gender (only Male or Female): ");
-        String gender = scan.nextLine().strip();
+        String gender = sc.nextLine().strip();
         System.out.print("ID Number (must be 18 digits): ");
-        String idNumber = scan.nextLine().strip();
+        String idNumber = sc.nextLine().strip();
         System.out.print("Phone Number (must be 11 digits): ");
-        String phoneNumber = scan.nextLine().strip();
+        String phoneNumber = sc.nextLine().strip();
 
         try {
             String sql = "INSERT INTO customers (name, gender, idNumber, phoneNumber) VALUES (?, ?, ?, ?)";
-            PreparedStatement exec = coon.prepareStatement(sql);
+            PreparedStatement exec = conn.prepareStatement(sql);
             exec.setString(1, customerName);
             exec.setString(2, gender);
             exec.setString(3, idNumber);
@@ -140,21 +141,20 @@ public class Func {
             System.out.println("Failed to add customer, reason: " + e.getMessage());
         } finally {
             System.out.println("Press any dight key to exit");
-            scan.nextInt();
+            sc.nextInt();
             CAPCmd(0);
         }
     }
-
 
     void DropCustomer() throws Exception {
         CAPCmd(0);
 
         System.out.print("Enter customer ID: ");
-        int id = scan.nextInt();
-        scan.nextLine();
+        int id = sc.nextInt();
+        sc.nextLine();
 
         String sql = "DELETE FROM customers WHERE id = ?";
-        try (PreparedStatement exec = coon.prepareStatement(sql)) {
+        try (PreparedStatement exec = conn.prepareStatement(sql)) {
             exec.setInt(1, id);
             int rowsAffected = exec.executeUpdate();
             if (rowsAffected == 1) {
@@ -165,36 +165,35 @@ public class Func {
         }
 
         System.out.println("Press any key to exit");
-        scan.nextInt();
+        sc.nextInt();
         CAPCmd(0);
     }
-
 
     void UpdateCustomerInfo() throws Exception {
         CAPCmd(0);
 
         System.out.print("Enter customer ID to update: ");
-        int idToUpdate = scan.nextInt();
-        scan.nextLine();
+        int idToUpdate = sc.nextInt();
+        sc.nextLine();
 
         System.out.println("Enter new customer information:");
         System.out.print("New ID: ");
-        int newId = scan.nextInt();
-        scan.nextLine();
+        int newId = sc.nextInt();
+        sc.nextLine();
 
         System.out.print("Name: ");
-        String name = scan.nextLine();
+        String name = sc.nextLine();
 
         System.out.print("Gender (only Male or Female): ");
-        String gender = scan.nextLine();
+        String gender = sc.nextLine();
 
         System.out.print("ID Number (must be 18 digits): ");
-        String idNumber = scan.nextLine();
+        String idNumber = sc.nextLine();
 
         System.out.print("Phone Number (must be 11 digits): ");
-        String phoneNumber = scan.nextLine();
+        String phoneNumber = sc.nextLine();
 
-        try (PreparedStatement exec = coon.prepareStatement(
+        try (PreparedStatement exec = conn.prepareStatement(
                 "UPDATE customers SET id = ?, gender = ?, `idNumber` = ?, name = ?, `phoneNumber` = ? WHERE id = ?")) {
             exec.setInt(1, newId);
             exec.setString(2, gender);
@@ -212,11 +211,10 @@ public class Func {
             System.out.println("Failed to update customer, reason: " + e.getMessage());
         } finally {
             System.out.println("Press any key to exit");
-            scan.nextInt();
+            sc.nextInt();
             CAPCmd(0);
         }
     }
-
 
     void ShowAllCustomers() throws Exception {
         CAPCmd(0);
@@ -241,42 +239,41 @@ public class Func {
         }
 
         System.out.println("Press any key to exit");
-        scan.nextInt();
+        sc.nextInt();
         CAPCmd(0);
     }
 
-
     void AddRoom() throws Exception {
-        CAPCmd(0); // Assume CAPCmd is a function to control program flow
+        CAPCmd(0);
 
         System.out.println("Enter new room information:");
 
         System.out.print("Location: ");
-        String location = scan.nextLine();
+        String location = sc.nextLine();
 
         System.out.print("Type: ");
-        String type = scan.nextLine();
+        String type = sc.nextLine();
 
         System.out.print("Area: ");
-        float area = scan.nextFloat();
-        scan.nextLine();
+        float area = sc.nextFloat();
+        sc.nextLine();
 
         System.out.print("Air Conditioner (true/false): ");
-        boolean airConditioner = scan.nextBoolean();
-        scan.nextLine();
+        boolean airConditioner = sc.nextBoolean();
+        sc.nextLine();
 
         System.out.print("Water Heater (true/false): ");
-        boolean waterHeater = scan.nextBoolean();
-        scan.nextLine();
+        boolean waterHeater = sc.nextBoolean();
+        sc.nextLine();
 
         System.out.print("Status: ");
-        String status = scan.nextLine();
+        String status = sc.nextLine();
 
         System.out.print("Price: ");
-        double price = scan.nextDouble();
-        scan.nextLine();
+        double price = sc.nextDouble();
+        sc.nextLine();
 
-        try (PreparedStatement exec = coon.prepareStatement(
+        try (PreparedStatement exec = conn.prepareStatement(
                 "INSERT INTO rooms (location, type, area, airConditioner, waterHeater, status, price) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
             exec.setString(1, location);
             exec.setString(2, type);
@@ -295,21 +292,20 @@ public class Func {
             System.out.println("Failed to add room, reason: " + e.getMessage());
         } finally {
             System.out.println("Press any key to exit");
-            scan.nextInt();
+            sc.nextInt();
             CAPCmd(0);
         }
     }
-
 
     void DropRoom() throws Exception {
         CAPCmd(0);
 
         System.out.print("Enter room ID to delete: ");
-        int idToDelete = scan.nextInt();
-        scan.nextLine();
+        int idToDelete = sc.nextInt();
+        sc.nextLine();
 
         String sql = "DELETE FROM rooms WHERE id = ?";
-        try (PreparedStatement exec = coon.prepareStatement(sql)) {
+        try (PreparedStatement exec = conn.prepareStatement(sql)) {
             exec.setInt(1, idToDelete);
             int rowsAffected = exec.executeUpdate();
             if (rowsAffected == 1) {
@@ -320,49 +316,48 @@ public class Func {
         }
 
         System.out.println("Press any dight key to exit");
-        scan.nextInt();
+        sc.nextInt();
         CAPCmd(0);
     }
-
 
     void UpdateRoomInfo() throws Exception {
         CAPCmd(0);
 
         System.out.print("Enter room ID to update: ");
-        int idToUpdate = scan.nextInt();
-        scan.nextLine();
+        int idToUpdate = sc.nextInt();
+        sc.nextLine();
 
         System.out.println("Enter new room information:");
         System.out.print("New ID: ");
-        int newId = scan.nextInt();
-        scan.nextLine();
+        int newId = sc.nextInt();
+        sc.nextLine();
 
         System.out.print("Location: ");
-        String location = scan.nextLine();
+        String location = sc.nextLine();
 
         System.out.print("Type: ");
-        String type = scan.nextLine();
+        String type = sc.nextLine();
 
         System.out.print("Area: ");
-        float area = scan.nextFloat();
-        scan.nextLine();
+        float area = sc.nextFloat();
+        sc.nextLine();
 
         System.out.print("Air Conditioner (true/false): ");
-        boolean airConditioner = scan.nextBoolean();
-        scan.nextLine();
+        boolean airConditioner = sc.nextBoolean();
+        sc.nextLine();
 
         System.out.print("Water Heater (true/false): ");
-        boolean waterHeater = scan.nextBoolean();
-        scan.nextLine();
+        boolean waterHeater = sc.nextBoolean();
+        sc.nextLine();
 
         System.out.print("Status: ");
-        String status = scan.nextLine();
+        String status = sc.nextLine();
 
         System.out.print("Price: ");
-        double price = scan.nextDouble();
-        scan.nextLine();
+        double price = sc.nextDouble();
+        sc.nextLine();
 
-        try (PreparedStatement exec = coon.prepareStatement(
+        try (PreparedStatement exec = conn.prepareStatement(
                 "UPDATE rooms SET location = ?, type = ?, area = ?, airConditioner = ?, waterHeater = ?, status = ?, price = ?, id = ? WHERE id = ?")) {
             exec.setString(1, location);
             exec.setString(2, type);
@@ -383,11 +378,10 @@ public class Func {
             System.out.println("Failed to update room, reason: " + e.getMessage());
         } finally {
             System.out.println("Press any dight key to exit");
-            scan.nextInt();
+            sc.nextInt();
             CAPCmd(0);
         }
     }
-
 
     void ShowAllRooms() throws Exception {
         CAPCmd(0);
@@ -419,34 +413,36 @@ public class Func {
             System.out.println("---------------------------------------");
         }
 
-        System.out.println("Press any key to exit");
-        scan.nextInt();
+        System.out.println("Press any dight key to exit");
+        sc.nextInt();
         CAPCmd(0);
     }
 
-
     void CheckIn() throws Exception {
-        CAPCmd(0); // Assume CAPCmd is a function to control program flow
+        CAPCmd(0);
 
         System.out.print("Enter customer ID: ");
-        int customerId = scan.nextInt();
-        scan.nextLine();
+        int customerId = sc.nextInt();
+        sc.nextLine();
 
         System.out.print("Enter room ID: ");
-        int roomId = scan.nextInt();
-        scan.nextLine();
+        int roomId = sc.nextInt();
+        sc.nextLine();
 
         System.out.print("Enter expected stay days: ");
-        int stayDays = scan.nextInt();
-        scan.nextLine();
+        int stayDays = sc.nextInt();
+        sc.nextLine();
 
+        // Calculate the current system time and ‘stayDays’ days later
         long checkInTimeInMillis = System.currentTimeMillis();
         long checkOutTimeInMillis = checkInTimeInMillis + (stayDays * 24 * 60 * 60 * 1000);
 
-        coon.setAutoCommit(false);
+        // Turn off transaction auto-commit because you want to modify multiple tables,
+        // and one fails and all fail
+        conn.setAutoCommit(false);
         try {
             String sql = "INSERT INTO checkIns (customerId, roomId, checkInTime, checkOutTime) VALUES (?, ?, ?, ?)";
-            try (PreparedStatement exec = coon.prepareStatement(sql)) {
+            try (PreparedStatement exec = conn.prepareStatement(sql)) {
                 exec.setInt(1, customerId);
                 exec.setInt(2, roomId);
                 exec.setTimestamp(3, new Timestamp(checkInTimeInMillis));
@@ -455,56 +451,58 @@ public class Func {
             }
 
             sql = "UPDATE rooms SET status = 'Occupied' WHERE id = ?";
-            try (PreparedStatement exec = coon.prepareStatement(sql)) {
+            try (PreparedStatement exec = conn.prepareStatement(sql)) {
                 exec.setInt(1, roomId);
                 exec.executeUpdate();
             }
 
             System.out.println("Room checked in successfully!\n");
-            coon.commit();
+            // The execution is successful, and the transaction is committed
+            conn.commit();
 
         } catch (Exception e) {
+
             System.out.println("Failed to check in room, reason: " + e.getMessage());
-            coon.rollback();
+            // Execution fails, and the transaction is rolled back
+            conn.rollback();
         } finally {
-            coon.setAutoCommit(true);
-            System.out.println("Press any key to exit");
-            scan.nextInt();
-            scan.nextLine();
+            conn.setAutoCommit(true);
+            System.out.println("Press any dight key to exit");
+            sc.nextInt();
+            sc.nextLine();
             CAPCmd(0);
         }
     }
-
 
     void CheckOut() throws Exception {
         CAPCmd(0);
 
         System.out.print("Enter check-in ID: ");
-        int checkInId = scan.nextInt();
-        scan.nextLine();
+        int checkInId = sc.nextInt();
+        sc.nextLine();
 
         String sql = "SELECT * FROM checkIns WHERE id = ?";
-        try (PreparedStatement exec = coon.prepareStatement(sql)) {
+        try (PreparedStatement exec = conn.prepareStatement(sql)) {
             exec.setInt(1, checkInId);
             ResultSet roomInfo = exec.executeQuery();
 
             if (!roomInfo.next()) {
                 System.out.println("Failed to check out. Check-in with ID " + checkInId + " not found.\n");
                 System.out.println("Press any dight key to exit");
-                scan.nextInt();
+                sc.nextInt();
                 CAPCmd(0);
                 return;
             }
 
             int roomId = roomInfo.getInt("roomId");
             sql = "UPDATE rooms SET status = 'Vacant' WHERE id = ?";
-            try (PreparedStatement updateRoom = coon.prepareStatement(sql)) {
+            try (PreparedStatement updateRoom = conn.prepareStatement(sql)) {
                 updateRoom.setInt(1, roomId);
                 updateRoom.executeUpdate();
             }
 
             sql = "DELETE FROM checkIns WHERE id = ?";
-            try (PreparedStatement deleteCheckIn = coon.prepareStatement(sql)) {
+            try (PreparedStatement deleteCheckIn = conn.prepareStatement(sql)) {
                 deleteCheckIn.setInt(1, checkInId);
                 deleteCheckIn.executeUpdate();
             }
@@ -514,35 +512,72 @@ public class Func {
         }
 
         System.out.println("Press any dight key to exit");
-        scan.nextInt();
+        sc.nextInt();
         CAPCmd(0);
     }
 
-
     void AddCost() throws Exception {
         CAPCmd(0);
+        class Service {
+            private final Integer id;
+            private final String name;
+            private final String description;
+            private final Double price;
+
+            public Service(Integer id, String name, String description, Double price) {
+                this.id = id;
+                this.name = name;
+                this.description = description;
+                this.price = price;
+            }
+
+            @Override
+            public String toString() {
+                return "id:" + id + ", name:" + name + ", description:" + description + ", price:" + price;
+            }
+        }
+
+        Map<Integer, Service> servicesById = new HashMap<>();
+
+        String sql = "SELECT * FROM services";
+        ResultSet query = exec.executeQuery(sql);
+
+        while (query.next()) {
+            servicesById.put(query.getInt("id"), new Service(
+                    query.getInt("id"),
+                    query.getString("name"),
+                    query.getString("description"),
+                    query.getDouble("price")));
+        }
+
+        System.out.println("opt some services:");
+        servicesById.values().forEach(System.out::println);
+
+        // Calculate the amount due
+        double amountDue = Arrays.stream(sc.nextLine().trim().split(" "))
+                .map(Integer::parseInt)
+                .map(servicesById::get)
+                .filter(Objects::nonNull)
+                .mapToDouble(service -> service.price)
+                .reduce(0, Double::sum);
 
         System.out.print("Payment Type: ");
-        String paymentType = scan.nextLine();
+        String paymentType = sc.nextLine();
 
         System.out.print("Payment Description: ");
-        String paymentDescription = scan.nextLine();
+        String paymentDescription = sc.nextLine();
 
         Timestamp paymentTime = Timestamp.valueOf(LocalDateTime.now());
 
         System.out.print("Customer ID: ");
-        int customerId = scan.nextInt();
-        scan.nextLine();
-
-        System.out.print("Amount Due: ");
-        double amountDue = scan.nextDouble();
-        scan.nextLine();
+        int customerId = sc.nextInt();
+        sc.nextLine();
 
         System.out.print("Amount Paid: ");
-        double amountPaid = scan.nextDouble();
-        scan.nextLine();
+        double amountPaid = sc.nextDouble();
+        sc.nextLine();
 
-        try (PreparedStatement exec = coon.prepareStatement(
+        try (PreparedStatement exec = conn.prepareStatement(
                 "INSERT INTO transactions (paymentType, paymentDescription, paymentTime, customerId, amountDue, amountPaid) VALUES (?, ?, ?, ?, ?, ?)")) {
             exec.setString(1, paymentType);
             exec.setString(2, paymentDescription);
@@ -559,23 +594,23 @@ public class Func {
         } catch (Exception e) {
             System.out.println("Failed to add transaction, reason: " + e.getMessage());
         } finally {
-            System.out.println("Press any key to exit");
-            scan.nextInt();
-            scan.nextLine();
+            System.out.println("Press any dight key to exit");
+            sc.nextInt();
+            sc.nextLine();
             CAPCmd(0);
         }
-    }
 
+    }
 
     void DropTransaction() throws Exception {
         CAPCmd(0);
 
         System.out.print("Enter transaction ID to delete: ");
-        int transactionId = scan.nextInt();
-        scan.nextLine();
+        int transactionId = sc.nextInt();
+        sc.nextLine();
 
         String sql = "DELETE FROM transactions WHERE id = ?";
-        try (PreparedStatement exec = coon.prepareStatement(sql)) {
+        try (PreparedStatement exec = conn.prepareStatement(sql)) {
             exec.setInt(1, transactionId);
             int rowsAffected = exec.executeUpdate();
             if (rowsAffected == 1) {
@@ -587,10 +622,9 @@ public class Func {
         }
 
         System.out.println("Press any dight key to exit");
-        scan.nextInt();
+        sc.nextInt();
         CAPCmd(0);
     }
-
 
     void ShowAllTransactions() throws Exception {
         CAPCmd(0);
@@ -624,7 +658,7 @@ public class Func {
         }
 
         System.out.println("Press any dight key to exit");
-        scan.nextInt();
+        sc.nextInt();
         CAPCmd(0);
     }
 

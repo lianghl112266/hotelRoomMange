@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 public class Main {
     static Func func;
+    
     static Scanner scan;
 
     public static void main(String[] args) throws Exception {

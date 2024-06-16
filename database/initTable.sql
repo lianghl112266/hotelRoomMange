@@ -9,7 +9,7 @@ show tables;
 -------------------
 ------创建库
 -------------------
---CREATE IF NOT EXISTS DATABASE hotelRoom ;
+CREATE IF NOT EXISTS DATABASE hotelRoom ;
 
 -------------------
 ------创建房间表
@@ -167,7 +167,7 @@ CREATE TRIGGER amountsVerifier
 BEFORE INSERT ON transactions
 FOR EACH ROW
 BEGIN
-    IF NEW.amountDue < NEW.amountPaid THEN
+    IF NEW.amountDue > NEW.amountPaid THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Error: amountDue cannot be greater than amountPaid';
     END IF;
